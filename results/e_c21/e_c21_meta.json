@@ -1,0 +1,50 @@
+{
+ "seeds": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  28,
+  29,
+  30
+ ],
+ "betas_new": [
+  0.0005,
+  0.002,
+  0.005
+ ],
+ "beta_published": 0.001,
+ "scenario": "fault",
+ "controller": "EHCO (published configuration)",
+ "half_lives_s": {
+  "0.0005": 69.3,
+  "0.002": 17.3,
+  "0.005": 6.9,
+  "0.001": 34.6
+ },
+ "patch": "sim.constants.EWMA_BETA patched around each run (read at call time in _health_step and evaluate_population)",
+ "published_e4": "results\\e4\\e4_raw.csv"
+}

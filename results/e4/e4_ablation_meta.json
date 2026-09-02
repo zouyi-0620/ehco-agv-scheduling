@@ -1,0 +1,30 @@
+{
+ "strategies": [
+  "EHCO",
+  "noFLC",
+  "noAW",
+  "A*-GA"
+ ],
+ "seeds": [
+  1,
+  2
+ ],
+ "scenarios": [
+  "congestion"
+ ],
+ "n_instances": 5,
+ "n_repeats": 2,
+ "replan_weight_provider": {
+  "EHCO": "FLC",
+  "noFLC": "fixed (weight_fn=None, crowding)",
+  "noAW": "FLC",
+  "A*-GA": "no replanning"
+ },
+ "initial_plan": {
+  "EHCO": "AW-NSGA-II",
+  "noFLC": "AW-NSGA-II",
+  "noAW": "NSGA-II-4obj fixed-weight",
+  "A*-GA": "A*-GA"
+ },
+ "published_e4_rows_reused": true
+}

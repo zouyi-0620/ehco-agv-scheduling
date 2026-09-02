@@ -1,0 +1,4 @@
+event,replan_type,triggers_per_run,trigger_rate,replan_applied_rate,response_ms_mean,response_ms_std,deg_ehco_mean,deg_ehco_std,deg_astar_mean,deg_astar_std,detection_rate,false_alarm_rate,f1_score,warn_t_mean
+A: sudden aisle congestion,local,1,1.0,0.68,645.5834174825487,175.40760622695478,45.40493221777564,30.53942060813204,59.02684932581264,26.7543125706173,nan,nan,nan,nan
+B: equipment fault warning,global,1,1.0,0.6,1349.2301211110973,1113.5963834199706,4.130828740025863,16.37802424631277,46.3113956055161,41.27548737800181,1.0,0.0,1.0,286.14666666666665
+C: urgent order insertion,local,1,1.0,1.0,85.9740946666534,3.554407608055224,43.79501829528418,24.977222943823715,92.85124214611103,22.50412596181842,nan,nan,nan,nan

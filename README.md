@@ -1,5 +1,7 @@
 # EHCO: Health-constrained Cooperative Path Optimization for Smart Warehousing
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22242890.svg)](https://doi.org/10.5281/zenodo.22242890)
+
 Python reference implementation accompanying the manuscript
 
 > **"Energy- and health-constrained cooperative multi-objective path optimization

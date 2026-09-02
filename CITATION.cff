@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "EHCO: Health-constrained cooperative multi-objective path optimization for smart warehouse AGV fleets"
+authors:
+  - family-names: Zou
+    given-names: Yi
+    affiliation: Zhanjiang University of Science and Technology
+  - family-names: Mai
+    given-names: Chunna
+    affiliation: Zhanjiang University of Science and Technology
+  - family-names: Wu
+    given-names: Dongliu
+    affiliation: Zhanjiang University of Science and Technology
+type: software
+license: MIT
+repository-code: "https://github.com/zouyi-0620/ehco-agv-scheduling"
+abstract: >-
+  Python reference implementation of the Equipment Health-Constrained
+  Optimization (EHCO) framework: a four-layer closed-loop architecture coupling
+  an AW-NSGA-II optimizer with a fuzzy-logic adaptive weight controller, a
+  multi-indicator state-of-health model, and event-driven replanning for
+  smart-warehouse AGV fleets. Includes the full experimental pipeline (E1
+  static comparison, E2 component ablations, E4 dynamic closed-loop study with
+  event-driven component ablation, E6 parameter sensitivity).
+keywords:
+  - AGV scheduling
+  - multi-objective optimization
+  - NSGA-II
+  - state of health
+  - smart warehouse
+  - discrete-event simulation

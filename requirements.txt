@@ -1,0 +1,7 @@
+# EHCO simulation framework
+# Python >= 3.10
+numpy>=2.5,<2.6          # RNG stream version-locked; published results use 2.5.1
+
+# optional - statistics pipeline (Wilcoxon / Holm / effect sizes)
+scipy>=1.11
+pandas>=2.0

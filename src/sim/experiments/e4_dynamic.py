@@ -50,7 +50,7 @@ Protocol
 - RNG: event sampling uses default_rng(seed*1000 + inst*13 + 777); the
   replanning runs use default_rng(seed*100000 + inst*100 + k + 12345).  All
   numpy operations must run on the managed venv (numpy 2.5.1) so that the
-  initial plans reproduce e1 exactly (numpy 2.5.1; older numpy 2.3.x draws a different
+  initial plans reproduce e1 exactly (anaconda numpy 2.3.5 draws a different
   PCG64 stream and is NOT usable).
 
 Outputs (results/e4/):
@@ -240,10 +240,21 @@ class DynamicSimulator:
                  use_flc: bool = True):
         """use_flc=False disables the FLC weight provider inside replanning
         (fixed-weight 4-objective NSGA-II) -- the dynamic-ablation variant
-        -FLC (e4_ablation.py).  Default True keeps the published EHCO path."""
+        -FLC (e4_ablation.py).  Default True keeps the published EHCO path.
+
+        Extension hooks (behaviour-preserving, defaults reproduce the
+        published EHCO runs bit-exactly):
+        * replan_obj_idx : objective subspace of the replanning optimiser
+          (default the full 4 objectives; the health-agnostic C17 baseline
+          overrides it with (0, 1, 2)).
+        * fault_t_ss : steady-state temperature of the injected thermal
+          fault (default T_FAULT_SS = 120 degC; the randomised-severity C18
+          experiment overrides it per run)."""
         self.sc = sc
         self.assign = np.asarray(assign, dtype=int)
         self.use_flc = use_flc
+        self.replan_obj_idx = (0, 1, 2, 3)
+        self.fault_t_ss = T_FAULT_SS
         self.N = len(sc.agvs)
         self.D = sc.warehouse.dist_improved
         self.grid = sc.warehouse.grid
@@ -254,6 +265,15 @@ class DynamicSimulator:
         self._replanned_global = False
         self.fault_agv: int | None = None
         self.fault_type: str | None = None
+        # C20/C22 extension hook (behaviour-preserving default): when False the
+        # local replanner keeps the STATIC distance tables (no congestion
+        # inflation, no incumbent guard under the congested model) -- the
+        # -costAdapt ablation (e_c22.py).
+        self.congestion_aware_replan = True
+        # C20: urgent tasks inserted mid-run are registered here at insertion
+        # time so that LATER replanning calls (e.g. the compound fault-warning
+        # global replan) see them in the remaining-task set and the frozen-map.
+        self.extra_tasks_all: list[Task] = []
 
     # ---- queue construction -------------------------------------------
     def _build_queues(self, tasks, assign):
@@ -345,6 +365,8 @@ class DynamicSimulator:
         self.fault_fallback = 0
         self.event_fired = False
         self.replan_info: list[dict] = []
+        self.min_h = 1.0                 # C20 health-violation tracking
+        self.extra_tasks_all = []        # C20: cleared on every reset
 
     # ---- per-step mechanics --------------------------------------------
     def _speed(self, i: int, seg: Seg) -> float:
@@ -373,9 +395,10 @@ class DynamicSimulator:
             in_maint = seg is not None and seg.task_idx == -1
             if self.fault[i] and not in_maint:
                 # fault load-rate 0.4 -> 1.0 (SPEC 10) plus thermal runaway:
-                # cooling failure drives the motor past T_MAX towards 120 degC
+                # cooling failure drives the motor past T_MAX towards the
+                # fault steady state (default 120 degC)
                 lr = C.LOAD_RATE_LOADED
-                t_ss = T_FAULT_SS
+                t_ss = self.fault_t_ss
             elif seg is None or seg.kind == "idle":
                 lr = C.LOAD_RATE_IDLE
                 t_ss = C.T_AMB + C.K_THERMAL * lr
@@ -395,6 +418,7 @@ class DynamicSimulator:
                 if self.warn_t is None:
                     self.warn_t = self.t
                     self.warn_agv = i
+        self.min_h = min(self.min_h, float(self.h.min()))
 
     def step(self, dt: float):
         self.t += dt
@@ -436,10 +460,12 @@ class DynamicSimulator:
             if self.cur_seg[i] is not None:
                 frozen[i] = self.cur_seg[i].task_idx
         frozen_set = set(frozen.values())
-        tmap = {t.tid: t for t in self.sc.tasks}
-        rem = [t for t in self.sc.tasks
+        all_tasks = list(self.sc.tasks) + list(self.extra_tasks_all)
+        tmap = {t.tid: t for t in all_tasks}
+        rem = [t for t in all_tasks
                if t.tid not in self.done and t.tid not in frozen_set]
         if extra_tasks:
+            rem = [t for t in rem if t.tid not in {x.tid for x in extra_tasks}]
             rem = rem + list(extra_tasks)
         agvs = []
         for i in range(self.N):
@@ -467,7 +493,8 @@ class DynamicSimulator:
             return 0.0
         t0 = time.perf_counter()
         res = nsga2_core(
-            sc_p, seed=int(rng.integers(1, 2 ** 31)), obj_idx=(0, 1, 2, 3),
+            sc_p, seed=int(rng.integers(1, 2 ** 31)),
+            obj_idx=self.replan_obj_idx,
             cfg=self.cfg, budget=EvalBudget(budget), name=name,
             weight_fn=flc_weight_provider if self.use_flc else None,
             use_crowding=True, pop_size=pop_size)
@@ -494,7 +521,8 @@ class DynamicSimulator:
 
     def _apply_new_assign(self, assign: np.ndarray, sc_p: Scenario):
         D = self.D
-        tmap = {t.tid: t for t in self.sc.tasks}
+        tmap = {t.tid: t for t in list(self.sc.tasks)
+                + list(self.extra_tasks_all)}
         new_q: list[list[Seg]] = [[] for _ in range(self.N)]
         # keep the remaining segments of every frozen (in-progress) task at the
         # head of its AGV queue; the replanning only re-assigns not-started tasks
@@ -555,7 +583,8 @@ class DynamicSimulator:
         if not sc_p.tasks:
             return 0.0
         incumbent = None
-        if self.congest_active and self.congested_aisle is not None:
+        if (self.congestion_aware_replan and self.congest_active
+                and self.congested_aisle is not None):
             # congestion-aware replanning: hand the optimiser the inflated
             # matrix so it re-sequences tasks away from the congested aisle;
             # guard the adoption with the incumbent plan's estimate
@@ -563,9 +592,12 @@ class DynamicSimulator:
             wh2.dist_improved = self._congested_D()
             wh2.dist_standard = wh2.dist_improved
             sc_p.warehouse = wh2
-            if not extra_tasks:
+            if not extra_tasks and all(t.tid < len(self.assign)
+                                       for t in sc_p.tasks):
                 # current assignment of the not-yet-started tasks (values are
-                # sc_p-local AGV indices; local replan keeps the full fleet)
+                # sc_p-local AGV indices; local replan keeps the full fleet).
+                # Skipped when mid-run-inserted urgent tasks (tid >= M) are
+                # present: they have no initial-plan assignment.
                 incumbent = np.array([int(self.assign[t.tid])
                                       for t in sc_p.tasks], dtype=int)
         return self._replan(sc_p, rng, C.NP_LOCAL, C.NP_LOCAL * C.GMAX_LOCAL,
@@ -624,7 +656,7 @@ class DynamicSimulator:
         kind = ev.get("kind")
         rng = ev.get("rng", np.random.default_rng(0))
         extra: list[Task] = []
-        if kind == "urgent":
+        if kind in ("urgent", "compound"):
             for k in range(ev.get("n_orders", 3)):
                 r2 = np.random.default_rng(int(rng.integers(1, 2 ** 31)))
                 while True:
@@ -657,6 +689,15 @@ class DynamicSimulator:
                 self.event_fired = True
                 if closed_loop:
                     self._local_replan(rng)
+            if kind == "compound" and not self.congest_active and t >= ev["t_c"]:
+                # C20 compound disturbance: cascading congestion -> thermal
+                # fault -> urgent orders, each firing its own trigger
+                self.congested_aisle = int(ev["aisle"])
+                self.congest_red = float(ev["reduction"])
+                self.congest_active = True
+                self.event_fired = True
+                if closed_loop:
+                    self._local_replan(rng)
             if kind == "fault" and self.fault_agv is None and t >= ev["t_inj"]:
                 target = self._pick_fault_target(rng, ev.get("agv"))
                 self.fault_fallback = int(ev.get("agv") is not None
@@ -667,7 +708,17 @@ class DynamicSimulator:
                 self.event_fired = True
                 if self.fault_type == "vibration":
                     self.fault_vib[target] = VIB_FAULT_OFFSET
-            if (kind == "fault" and self.fault_agv is not None
+            if kind == "compound" and self.fault_agv is None and t >= ev["t_f"]:
+                # adaptive targeting: the most-loaded AGV in a loaded run
+                target = self._pick_fault_target(rng, None)
+                self.fault_fallback = 0
+                self.fault_agv = target
+                self.fault_type = ev.get("fault_type", "thermal")
+                self.fault[target] = True
+                self.event_fired = True
+                if self.fault_type == "vibration":
+                    self.fault_vib[target] = VIB_FAULT_OFFSET
+            if (kind in ("fault", "compound") and self.fault_agv is not None
                     and self.warned[self.fault_agv] and not self._replanned_global):
                 self._replanned_global = True
                 if closed_loop:
@@ -676,7 +727,18 @@ class DynamicSimulator:
                 self._urgent_done = True
                 self.event_fired = True
                 if closed_loop:
-                    self._local_replan(rng, extra_tasks=extra)
+                    # register the inserted orders so later replanning calls
+                    # (none in the single-event scenario) would also see them
+                    self.extra_tasks_all = list(extra)
+                    self._local_replan(rng)
+                else:
+                    self._append_urgent(extra)
+            if kind == "compound" and not self._urgent_done and t >= ev["t_u"]:
+                self._urgent_done = True
+                self.event_fired = True
+                if closed_loop:
+                    self.extra_tasks_all = list(extra)
+                    self._local_replan(rng)
                 else:
                     self._append_urgent(extra)
             # ---- advance ------------------------------------------------
@@ -704,6 +766,9 @@ class DynamicSimulator:
             "fault_agv": self.fault_agv,
             "fault_fallback": self.fault_fallback,
             "event_fired": self.event_fired,
+            "min_h": float(self.min_h),
+            "n_replans": int(sum(1 for r in self.replan_info
+                                 if not r.get("skipped", False))),
             "hist": (self.hist_t, self.hist_frac, self.hist_h),
             "replan_info": list(self.replan_info),
         }
@@ -750,6 +815,29 @@ def make_instances(kind: str) -> list[dict]:
                             "fault_type": "thermal" if rng.random() < 0.5
                             else "vibration",
                             "mode": "adaptive"})
+        elif kind == "compound":
+            # C20: cascading compound disturbance -- congestion, then an
+            # equipment fault, then urgent orders.  Instance 0 is the nominal
+            # timeline (t_c = 150 s, t_f = 180 s, t_u = 220 s, aisle 6, 70%
+            # reduction, thermal fault); instances 1..4 randomise the onset
+            # times (strict cascade ordering t_c < t_f < t_u, gaps 20-60 s),
+            # the aisle, the severity and the fault type.
+            if k == 0:
+                out.append({"kind": "compound", "t_c": 150.0, "aisle": 6,
+                            "reduction": 0.70, "t_f": 180.0,
+                            "fault_type": "thermal", "t_u": 220.0,
+                            "n_orders": 3})
+            else:
+                t_c = float(rng.uniform(100.0, 180.0))
+                t_f = float(t_c + rng.uniform(20.0, 60.0))
+                t_u = float(t_f + rng.uniform(20.0, 60.0))
+                out.append({"kind": "compound", "t_c": t_c,
+                            "aisle": int(rng.integers(1, 12)),
+                            "reduction": float(rng.uniform(0.50, 0.80)),
+                            "t_f": t_f,
+                            "fault_type": "thermal" if rng.random() < 0.5
+                            else "vibration",
+                            "t_u": t_u, "n_orders": 3})
         else:  # urgent
             if k == 0:
                 out.append({"kind": "urgent", "t_ev": 400.0, "n_orders": 3})
@@ -845,26 +933,35 @@ def aggregate(raw: list[dict]) -> list[dict]:
                     "metric": "replan_applied_rate", "mean": float(np.mean(appl)),
                     "std": 0.0, "n": len(rows)})
         if scenario == "fault":
-            det = np.array([r["detected"] for r in rows])
-            fp = np.array([r["false_pos"] for r in rows])
-            det_rate = float(det.mean())
-            far = float(fp.mean()) / (C.N_AGV - 1)
-            tp = int(det.sum()); fn = int((1 - det).sum()); fpp = int(fp.sum())
-            prec = tp / (tp + fpp) if (tp + fpp) else float("nan")
-            rec = tp / (tp + fn) if (tp + fn) else float("nan")
-            f1 = 2 * prec * rec / (prec + rec) if (prec + rec) else float("nan")
-            agg.append({"scenario": scenario, "strategy": strategy,
-                        "metric": "detection_rate", "mean": det_rate, "std": 0.0,
-                        "n": len(rows)})
-            agg.append({"scenario": scenario, "strategy": strategy,
-                        "metric": "false_alarm_rate", "mean": far, "std": 0.0,
-                        "n": len(rows)})
-            agg.append({"scenario": scenario, "strategy": strategy,
-                        "metric": "f1_score", "mean": f1, "std": 0.0,
-                        "n": len(rows)})
-            agg.append({"scenario": scenario, "strategy": strategy,
-                        "metric": "warn_t_mean", "mean": _mean_std([r["warn_t"] for r in rows])[0],
-                        "std": _mean_std([r["warn_t"] for r in rows])[1], "n": len(rows)})
+            # rows reused from e4_raw.csv (published) carry no per-run
+            # detection columns; detection metrics are platform-level
+            # (identical across strategies) and are only aggregated over
+            # rows that carry them.
+            det_rows = [r for r in rows if r.get("detected") is not None]
+            if det_rows:
+                det = np.array([r["detected"] for r in det_rows])
+                fp = np.array([r["false_pos"] for r in det_rows])
+                det_rate = float(det.mean())
+                far = float(fp.mean()) / (C.N_AGV - 1)
+                tp = int(det.sum()); fn = int((1 - det).sum()); fpp = int(fp.sum())
+                prec = tp / (tp + fpp) if (tp + fpp) else float("nan")
+                rec = tp / (tp + fn) if (tp + fn) else float("nan")
+                f1 = 2 * prec * rec / (prec + rec) if (prec + rec) else float("nan")
+                agg.append({"scenario": scenario, "strategy": strategy,
+                            "metric": "detection_rate", "mean": det_rate, "std": 0.0,
+                            "n": len(det_rows)})
+                agg.append({"scenario": scenario, "strategy": strategy,
+                            "metric": "false_alarm_rate", "mean": far, "std": 0.0,
+                            "n": len(det_rows)})
+                agg.append({"scenario": scenario, "strategy": strategy,
+                            "metric": "f1_score", "mean": f1, "std": 0.0,
+                            "n": len(det_rows)})
+                wt = [r["warn_t"] for r in det_rows if r.get("warn_t") is not None]
+                if wt:
+                    agg.append({"scenario": scenario, "strategy": strategy,
+                                "metric": "warn_t_mean",
+                                "mean": _mean_std(wt)[0],
+                                "std": _mean_std(wt)[1], "n": len(wt)})
     return agg
 
 

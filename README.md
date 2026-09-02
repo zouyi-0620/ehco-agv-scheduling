@@ -11,8 +11,10 @@ Python reference implementation accompanying the manuscript
 This repository contains the complete simulation and optimization framework used
 to produce every experimental result in the manuscript: the static comparison
 study (E1), the component ablations (E2), the dynamic fault/congestion event
-study (E4, including the event-driven ablation isolating the FLC and
-adaptive-weight contributions), and the parameter-sensitivity study (E6).
+study including the compound congestion–fault–urgent cascade scenario (E4,
+together with the event-driven ablation isolating the FLC and adaptive-weight
+contributions), the parameter-sensitivity study (E6), and the seven validation
+experiments (E-C16 … E-C22).
 
 ## Overview
 
@@ -23,7 +25,7 @@ dynamics, vibration wear) for an AGV fleet in a 50 × 40 m grid warehouse.
 The FLC continuously re-weights the four objectives (makespan, energy,
 distance/urgency balance, health) from live fleet state, and a closed-loop
 replanning layer reacts to dynamic events (aisle congestion, equipment fault
-warnings).
+warnings, urgent-order insertions).
 
 All experiments share:
 
@@ -56,7 +58,8 @@ python -m sim.experiments.e1_main
 python -m sim.experiments.e2_ablation
 
 # E4: dynamic event study (aisle congestion + equipment fault warning,
-#      with closed-loop replanning)
+#      with closed-loop replanning; --scenario compound adds the
+#      congestion–fault–urgent cascade scenario D)
 python -m sim.experiments.e4_dynamic
 
 # E4 ablation: isolate FLC weight adaptation (-FLC) and the
@@ -65,6 +68,28 @@ python -m sim.experiments.e4_ablation
 
 # E6: one-at-a-time parameter sensitivity of AW-NSGA-II
 python -m sim.experiments.e6_sensitivity
+
+# Validation experiments:
+# E-C16: health-dimension activation (f4 switched on)
+python -m sim.experiments.e_c16
+
+# E-C17: dynamic-gain attribution (replanning-architecture ablation)
+python -m sim.experiments.e_c17
+
+# E-C18: detection severity boundary sweep
+python -m sim.experiments.e_c18
+
+# E-C19: closed-loop MOEA/D optimizer baseline
+python -m sim.experiments.e_c19
+
+# E-C20: compound-event cascade scenario
+python -m sim.experiments.e_c20
+
+# E-C21: health-tracking rate (beta) sensitivity
+python -m sim.experiments.e_c21
+
+# E-C22: dynamic path-cost ablation (standard vs improved A*)
+python -m sim.experiments.e_c22
 ```
 
 Each runner writes CSV/JSON outputs under `results/` with a fixed schema;
@@ -84,14 +109,24 @@ src/sim/
   metrics.py          HV, delta-h fleet statistics, convergence metrics
   algorithms/         NSGA-II / AW-NSGA-II / MOEA/D / NSGA-III / GA-SA /
                       improved-A*-GA / LWC baselines
-  experiments/        E1 / E2 / E4 / E4-ablation / E6 runners + figure data
+  experiments/        E1 / E2 / E4 / E4-ablation / E6 runners and the
+                      E-C16 … E-C22 validation-experiment runners
+results/              aggregated tables and per-run data backing every figure
+                      and table of the manuscript (see Data availability)
 ```
 
 ## Data availability
 
-Generated datasets are available from the corresponding author upon
-reasonable request. A Zenodo snapshot of this repository will be linked at
-publication.
+All aggregated result tables (CSV) supporting Figures 2–7 and Tables 1–11 and
+S1–S7 of the manuscript, together with the per-run data of the dynamic-event
+study (E4) and the seven validation experiments (E-C16 health-dimension
+activation, E-C17 dynamic-gain attribution, E-C18 detection severity
+boundary, E-C19 closed-loop MOEA/D optimizer baseline, E-C20 compound-event
+cascade, E-C21 health-tracking-rate sensitivity, E-C22 dynamic path-cost
+ablation), are included in the `results/` directory of this repository
+(release v1.0.1). The seed manifest for all 30-seed experiments is
+`results/seeds.json`. Raw simulation outputs beyond these files are available
+from the corresponding author upon reasonable request.
 
 ## License
 

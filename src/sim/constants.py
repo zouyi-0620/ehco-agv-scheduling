@@ -1,6 +1,6 @@
 """EHCO simulation core - single source of truth for all parameters.
 
-All values transcribed from the experiment specification (SPEC.md),
+All values transcribed from SPEC.md (D:/WorkBuddy/2026-08-05-10-06-28/SPEC.md),
 which was extracted from the manuscript (review/manuscript_full.txt).
 Decision points D1-D10 are documented in SPEC.md section 0.
 """
@@ -76,7 +76,9 @@ C_P = 0.5                        # CNY/s
 H_SAFE = 0.6
 H_CRIT = 0.2
 ALPHA_PENALTY = 0.5
-BETA_SLACK = 0.3                 # deadline relaxation for urgent tasks
+BETA_SLACK = 0.3                 # deadline tightness factor for urgent tasks:
+                                 # slack = deadline*(1 - BETA_SLACK*omega), so
+                                 # more urgent (higher omega) -> tighter deadline
 DEADLINE_MULT = 1.5              # deadline multiplier (D4)
 RHO_MAX = 0.8                    # congestion constraint
 

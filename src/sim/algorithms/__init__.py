@@ -33,11 +33,17 @@ ORDER = list(REGISTRY)                     # canonical table order (SPEC 8)
 
 def run_algorithm(name: str, sc: Scenario, seed: int,
                   cfg: EvalConfig | None = None,
-                  budget: EvalBudget | None = None) -> AlgorithmResult:
-    """Run one algorithm on a scenario seed; raises KeyError for bad names."""
+                  budget: EvalBudget | None = None,
+                  **kwargs) -> AlgorithmResult:
+    """Run one algorithm on a scenario seed; raises KeyError for bad names.
+
+    Extra keyword arguments (e.g. tracker for anytime studies) are forwarded
+    to the algorithm entry point; algorithms that do not declare them raise a
+    TypeError, so callers must only pass kwargs the target supports.
+    """
     if name not in REGISTRY:
         raise KeyError(f"unknown algorithm {name!r}; available: {ORDER}")
-    return REGISTRY[name](sc, seed, cfg, budget)
+    return REGISTRY[name](sc, seed, cfg, budget, **kwargs)
 
 
 __all__ = ["REGISTRY", "ORDER", "run_algorithm", "AlgorithmResult",

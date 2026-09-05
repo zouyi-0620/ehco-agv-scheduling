@@ -54,10 +54,12 @@ def _load_or_write_seeds(path: str) -> list[int]:
     return seeds
 
 
-def _fleet_health(res: AlgorithmResult, sc) -> dict:
+def _fleet_health(res: AlgorithmResult, sc,
+                  h0_coupling: float = 0.0) -> dict:
     """delta-h stats from a true-degradation replay of the reported solution."""
     plans = build_plan(res.best_assign, sc)
-    sim = simulate_plan_health(plans, sc)
+    sim = simulate_plan_health(plans, sc,
+                               h0_coupling=h0_coupling)
     return {"delta_h_mean": sim["delta_h_mean"],
             "delta_h_max": float(sim["delta_h_max"]),
             "gini_delta_h": sim["gini"],

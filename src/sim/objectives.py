@@ -105,7 +105,7 @@ def evaluate_population(assign: np.ndarray, sc: Scenario,
         e_wh = e_wh / 3600.0
         new_time = cur_time[rows, agv] + t_seg
         deadline = C.DEADLINE_MULT * t_seg             # D4 (same-segment form)
-        slack = deadline * (1.0 + C.BETA_SLACK * omega[j])
+        slack = deadline * (1.0 - C.BETA_SLACK * omega[j])
         tardy = np.maximum(0.0, new_time - slack)
         cur_time[rows, agv] = new_time
         cum_energy_wh[rows, agv] += e_wh
@@ -174,14 +174,32 @@ def build_plan(assign: np.ndarray, sc: Scenario,
 
 
 def simulate_plan_health(plans: list[list[PlanSegment]], sc: Scenario,
-                         substep: float = 1.0) -> dict:
+                         substep: float = 1.0,
+                         h0_coupling: float = 0.0) -> dict:
     """Simulate true degradation + EWMA SoH along executed plans.
 
     Thermal state uses the closed-form first-order response per substep;
     EWMA is integrated at `substep` seconds (beta rescaled exactly, so the
     1 s discretisation only approximates the within-step h_inst trajectory).
-    Returns per-AGV h trajectory summary and fleet metrics."""
+    Returns per-AGV h trajectory summary and fleet metrics.
+
+    h0_coupling (default 0.0, bit-identical to the published engine):
+    reviewer-7 physically-consistent variant in which a lower initial health
+    accelerates subsequent degradation: (i) the mechanical wear coefficient
+    of AGV i becomes K_WEAR*(1 + h0_coupling*(1 - h0_i)), and (ii) its
+    steady-state motor temperature for a given load rate is scaled by
+    (1 + 0.10*h0_coupling*(1 - h0_i)) -- a lower-health vehicle reaches a
+    higher temperature under the same load (lower cooling efficiency), so a
+    protected light-loaded weak vehicle does not recover toward the healthy
+    idle plateau. h_inst is clamped to [0, 1] under this variant."""
     N = len(sc.agvs)
+    h0 = np.array([a.h0 for a in sc.agvs])
+    if h0_coupling > 0.0:
+        k_wear = C.K_WEAR * (1.0 + h0_coupling * (1.0 - h0))
+        therm_mult = 1.0 + 0.10 * h0_coupling * (1.0 - h0)
+    else:
+        k_wear = np.full(N, C.K_WEAR)
+        therm_mult = np.ones(N)
     T = np.full(N, C.T_AMB)
     cycles = np.zeros(N)
     km = np.zeros(N)
@@ -194,7 +212,7 @@ def simulate_plan_health(plans: list[list[PlanSegment]], sc: Scenario,
         for seg in plans[i]:
             lr = {"empty": C.LOAD_RATE_EMPTY, "loaded": C.LOAD_RATE_LOADED,
                   "idle": C.LOAD_RATE_IDLE}[seg.kind]
-            t_ss = C.T_AMB + C.K_THERMAL * lr
+            t_ss = C.T_AMB + C.K_THERMAL * lr * therm_mult[i]
             tau = C.TAU_THERMAL if t_ss > T[i] else C.TAU_COOL
             dist_rate = seg.dist / seg.duration if seg.duration > 0 else 0.0
             t_remaining = seg.duration
@@ -204,8 +222,10 @@ def simulate_plan_health(plans: list[list[PlanSegment]], sc: Scenario,
                 T[i] = t_ss + (T[i] - t_ss) * np.exp(-dt / tau)
                 cycles[i] += dist_rate * dt / C.L_CYCLE
                 km[i] += dist_rate * dt / 1000.0
-                v_rms = C.V0_VIB + C.K_WEAR * km[i]
+                v_rms = C.V0_VIB + k_wear[i] * km[i]
                 h_inst = instant_health(cycles[i], T[i], v_rms)
+                if h0_coupling > 0.0:
+                    h_inst = min(1.0, max(0.0, h_inst))
                 h_cum[i] = beta_sub * h_inst + (1 - beta_sub) * h_cum[i]
                 t_remaining -= dt
                 if seg.kind == "idle" and t_remaining < 1e-9:

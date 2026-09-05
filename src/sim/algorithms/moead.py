@@ -34,7 +34,12 @@ def _tcheby(f: np.ndarray, w: np.ndarray, z: np.ndarray) -> float:
 
 
 def run(sc: Scenario, seed: int, cfg: EvalConfig | None = None,
-        budget: EvalBudget | None = None) -> AlgorithmResult:
+        budget: EvalBudget | None = None,
+        tracker=None) -> AlgorithmResult:
+    # `tracker`: optional callable(g, elapsed_s, F_of_pop) invoked at every
+    # generation end for anytime / best-so-far studies (B2).  Default None =>
+    # behaviour bit-identical to the pre-tracker code path.  Note F is mutated
+    # in place across generations in MOEA/D, so tracker receives a copy.
     cfg = cfg or EvalConfig()
     budget = budget or EvalBudget()
     rng = np.random.default_rng(seed)
@@ -99,6 +104,8 @@ def run(sc: Scenario, seed: int, cfg: EvalConfig | None = None,
         if g % 10 == 0:
             f_now = fast_non_dominated_sort(Fs[:, oi])
             front_history.append((g, F[f_now[0]].copy()))
+        if tracker is not None:
+            tracker(g, time.perf_counter() - start, F.copy())
         g += 1
 
     wall = time.perf_counter() - start

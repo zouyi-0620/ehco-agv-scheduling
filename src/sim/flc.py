@@ -127,11 +127,13 @@ def flc_weights(rho: float, gamma: float, h_bar: float) -> np.ndarray:
 def scenario_features(assignments, tasks, h_cum) -> tuple[float, float, float]:
     """Compute (rho, gamma, h_bar) from current state.
 
-    rho: fraction of aisle-occupied capacity (congestion proxy in [0,1]);
+    rho: fleet-activity ratio min(1, n_active/20) in [0,1] (NOT a spatial
+    congestion measure; spatial congestion is handled by the aisle-occupancy
+    trigger and the congestion-aware cost inflation, manuscript §2.5/§3.11);
     gamma: urgent-task ratio among pending tasks; h_bar: mean cumulative health.
     """
     h_bar = float(np.mean(h_cum)) if len(h_cum) else 1.0
     gamma = float(np.mean([t.omega > 0 for t in tasks])) if tasks else 0.0
-    # static scenarios: baseline congestion from fleet density proxy
+    # fleet-activity proxy (manuscript §2.4.2); 0.5 for the nominal 10-AGV fleet
     rho = min(1.0, len(h_cum) / 20.0) if len(h_cum) else 0.0
     return rho, gamma, h_bar

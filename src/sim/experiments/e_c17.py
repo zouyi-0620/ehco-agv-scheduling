@@ -63,8 +63,9 @@ from ..objectives import EvalConfig
 from ..scenario import make_scenario
 
 RESULTS = os.path.join(os.path.dirname(__file__), "..", "results", "e_c17")
-PUBLISHED_E4 = os.path.join(os.path.dirname(__file__), "..", "..",
-                            "results", "e4", "e4_raw.csv")
+_CODE_E4 = os.path.join(os.path.dirname(__file__), "..", "results", "e4", "e4_raw.csv")
+_REL_E4 = os.path.join(os.path.dirname(__file__), "..", "..", "results", "e4", "e4_raw.csv")
+PUBLISHED_E4 = _CODE_E4 if os.path.exists(_CODE_E4) else _REL_E4
 SEEDS = list(range(1, 31))
 
 

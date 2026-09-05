@@ -133,11 +133,14 @@ def mutate(assign: np.ndarray, eligible: np.ndarray,
 
 
 def tournament(k: int, ranks: np.ndarray, second: np.ndarray | None,
-               rng: np.random.Generator, size: int) -> np.ndarray:
+               rng: np.random.Generator, size: int,
+               counter: dict | None = None) -> np.ndarray:
     """k-ary tournament; lower rank (then lower `second`) wins.
 
     Pass second = -crowding to keep the most isolated points (NSGA-II),
     or second = scalar/objective value to minimise it directly.
+    `counter` (optional, {"tournaments","tiebreaks"}) records how often the
+    secondary criterion decides a rank-tied tournament (no behaviour change).
     """
     idx = rng.integers(0, len(ranks), size=(size, k))
     out = np.empty(size, dtype=int)
@@ -145,6 +148,10 @@ def tournament(k: int, ranks: np.ndarray, second: np.ndarray | None,
         cand = idx[t]
         r = ranks[cand]
         s = np.zeros(k) if second is None else second[cand]
+        if counter is not None:
+            counter["tournaments"] += 1
+            if (r == r.min()).sum() > 1:
+                counter["tiebreaks"] += 1
         out[t] = cand[np.lexsort((s, r))[0]]
     return out
 
@@ -193,7 +200,12 @@ def nsga2_core(sc: Scenario, seed: int, obj_idx: tuple[int, ...],
                weight_fn=None,          # h_cum -> (4,) weights (变权标量化)
                use_crowding: bool = False,
                params_extra: dict | None = None,
-               pop_size: int | None = None) -> AlgorithmResult:
+               pop_size: int | None = None,
+               tracker=None) -> AlgorithmResult:
+    # `tracker`: optional callable(g, elapsed_s, F_of_pop) invoked at every
+    # generation end for anytime / best-so-far studies (B2).  Default None =>
+    # behaviour bit-identical to the pre-tracker code path (verified against
+    # e1_metrics.csv).
     """Generational NSGA-II with pluggable last-front fill criterion.
 
     weight_fn is used for the SPEC-7 "变权标量化" last-front fill (keep lowest
@@ -232,6 +244,7 @@ def nsga2_core(sc: Scenario, seed: int, obj_idx: tuple[int, ...],
         params.update(params_extra)
     start = time.perf_counter()
     g = 0
+    flc_stats = {"tournaments": 0, "tiebreaks": 0}
     while budget.can_afford(P):
         # ---- current-generation selection criteria ----------------------
         if weight_fn is not None:
@@ -259,7 +272,7 @@ def nsga2_core(sc: Scenario, seed: int, obj_idx: tuple[int, ...],
         else:
             pc, pm = pc_at(g), pm_at(g)
         for i in range(0, P, 2):
-            a = tournament(2, ranks, second, rng, 2)
+            a = tournament(2, ranks, second, rng, 2, counter=flc_stats)
             p1, p2 = pop[a[0]], pop[a[1]]
             if rng.random() < pc:
                 c1, c2 = uniform_col_crossover_pair(p1, p2, rng)
@@ -305,11 +318,18 @@ def nsga2_core(sc: Scenario, seed: int, obj_idx: tuple[int, ...],
 
         if g % 10 == 0:
             front_history.append((g, F.copy()))
+        if tracker is not None:
+            # F is a freshly sliced array each generation (comb_F[sel_arr]),
+            # so passing the reference is safe (no later in-place mutation).
+            tracker(g, time.perf_counter() - start, F)
         g += 1
 
     wall = time.perf_counter() - start
     params["gens_actual"] = g
     params["evals"] = budget.spent
+    if flc_stats["tournaments"] > 0:
+        params["flc_tournaments"] = flc_stats["tournaments"]
+        params["flc_tiebreaks"] = flc_stats["tiebreaks"]
 
     fronts_final = fast_non_dominated_sort(Fs[:, oi])
     f1_idx = fronts_final[0]

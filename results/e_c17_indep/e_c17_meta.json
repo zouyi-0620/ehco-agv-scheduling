@@ -1,0 +1,46 @@
+{
+ "seeds": [
+  31,
+  32,
+  33,
+  34,
+  35,
+  36,
+  37,
+  38,
+  39,
+  40,
+  41,
+  42,
+  43,
+  44,
+  45,
+  46,
+  47,
+  48,
+  49,
+  50,
+  51,
+  52,
+  53,
+  54,
+  55,
+  56,
+  57,
+  58,
+  59,
+  60
+ ],
+ "variants": [
+  "agnostic",
+  "agnostic-excl"
+ ],
+ "agnostic_objective": "(f1,f2,f3), crowding NSGA-II, no FLC, no f4, no c_m",
+ "budgets": {
+  "local": 4000,
+  "global": 20000
+ },
+ "initial_plan": "published AW-NSGA-II (identical to E4 EHCO rows)",
+ "published_e4": "sim\\results\\e4_indep\\e4_raw.csv",
+ "trigger": "identical to EHCO (congestion onset / urgent insertion / platform health warning h_cum < 0.6)"
+}

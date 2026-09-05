@@ -49,6 +49,6 @@
   "local": 4000,
   "global": 20000
  },
- "published_e4": "results\\e4\\e4_raw.csv",
+ "published_e4": "sim\\results\\e4\\e4_raw.csv",
  "trigger": "identical to EHCO"
 }

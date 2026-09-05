@@ -11,20 +11,20 @@
  },
  "summary": {
   "EHCO": {
-   "f1_base": 316.0,
-   "f1_event": 328.0,
-   "deg_pct": 3.79746835443038,
-   "warn_t": 167.0,
-   "maint_enter": 227.0,
-   "fault_agv": 9,
+   "f1_base": 337.0,
+   "f1_event": 334.0,
+   "deg_pct": -0.8902077151335311,
+   "warn_t": 168.0,
+   "maint_enter": 258.0,
+   "fault_agv": 8,
    "replan_info": [
     {
      "name": "AW-global",
      "budget": 20000,
      "pop": 100,
-     "n_tasks": 14,
+     "n_tasks": 13,
      "n_agv": 9,
-     "wall_ms": 497.1129000000474,
+     "wall_ms": 524.6582999998282,
      "evals": 20000
     }
    ],

@@ -117,16 +117,23 @@ results/              aggregated tables and per-run data backing every figure
 
 ## Data availability
 
-All aggregated result tables (CSV) supporting Figures 2–7 and Tables 1–11 and
-S1–S7 of the manuscript, together with the per-run data of the dynamic-event
-study (E4) and the seven validation experiments (E-C16 health-dimension
-activation, E-C17 dynamic-gain attribution, E-C18 detection severity
-boundary, E-C19 closed-loop MOEA/D optimizer baseline, E-C20 compound-event
-cascade, E-C21 health-tracking-rate sensitivity, E-C22 dynamic path-cost
-ablation), are included in the `results/` directory of this repository
-(release v1.0.1). The seed manifest for all 30-seed experiments is
-`results/seeds.json`. Raw simulation outputs beyond these files are available
-from the corresponding author upon reasonable request.
+The Python source code implementing the EHCO framework, all comparison and
+ablation algorithms, and the complete experiment pipelines (static
+comparison E1, component ablation E2, dynamic-event study E4 and its
+ablation, parameter sensitivity E6, and the validation experiments of
+§3.5–§3.11, whose per-run data reside in the repository directories
+e_c16–e_c22) is openly available in a public GitHub repository
+(https://github.com/zouyi-0620/ehco-agv-scheduling, archived on Zenodo with
+concept DOI 10.5281/zenodo.22242889, which resolves to the latest release;
+the validation-experiment and E4 per-run data were added in release v1.0.1,
+and the independent-seed validation arms, the anytime best-so-far study,
+the activated-health robustness sweeps and the h0-coupled degradation replay
+were added in release v1.0.2). The aggregated result tables (CSV) supporting
+Figures 2–8 and Tables 1–12 and S1–S15 are included in the same repository.
+Raw simulation outputs are available from the corresponding author upon
+reasonable request. Integer generator seeds for the 1–60 protocol and the
+RNG stream offsets are archived together with the per-run CSVs in the Zenodo
+releases listed above.
 
 ## License
 

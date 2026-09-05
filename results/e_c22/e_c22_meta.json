@@ -1,0 +1,43 @@
+{
+ "seeds": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  28,
+  29,
+  30
+ ],
+ "variants": [
+  "stdA*",
+  "nocostadapt"
+ ],
+ "dist_improved_equals_dist_standard": true,
+ "stdA_protocol": "standard tables in planner + executor (EvalConfig.use_improved_astar=False)",
+ "nocostadapt_protocol": "congestion_aware_replan=False: local replanner keeps static tables, unconditional adoption",
+ "published_e4": "results\\e4\\e4_raw.csv",
+ "c20_raw": "sim\\results\\e_c20\\e_c20_raw.csv"
+}

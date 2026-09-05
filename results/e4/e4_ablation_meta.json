@@ -1,0 +1,60 @@
+{
+ "strategies": [
+  "EHCO",
+  "noFLC",
+  "noAW",
+  "A*-GA"
+ ],
+ "seeds": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  28,
+  29,
+  30
+ ],
+ "scenarios": [
+  "congestion",
+  "fault",
+  "urgent"
+ ],
+ "n_instances": 5,
+ "n_repeats": 30,
+ "replan_weight_provider": {
+  "EHCO": "FLC",
+  "noFLC": "fixed (weight_fn=None, crowding)",
+  "noAW": "FLC",
+  "A*-GA": "no replanning"
+ },
+ "initial_plan": {
+  "EHCO": "AW-NSGA-II",
+  "noFLC": "AW-NSGA-II",
+  "noAW": "NSGA-II-4obj fixed-weight",
+  "A*-GA": "A*-GA"
+ },
+ "published_e4_rows_reused": true
+}

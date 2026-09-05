@@ -1,0 +1,4 @@
+variant,rho_mean,rho_std,n
+Full,0.123,0.307,30
+hard-only,-0.129,0.301,30
+GA-SA-multiSoH,0.053,0.368,30

@@ -1,0 +1,44 @@
+{
+ "seed": 1,
+ "instance_index": 3,
+ "event": {
+  "kind": "fault",
+  "t_inj": 87.05594713886512,
+  "agv": null,
+  "fault_type": "vibration",
+  "mode": "adaptive",
+  "_idx": 3
+ },
+ "summary": {
+  "EHCO": {
+   "f1_base": 337.0,
+   "f1_event": 334.0,
+   "deg_pct": -0.8902077151335311,
+   "warn_t": 168.0,
+   "maint_enter": 258.0,
+   "fault_agv": 8,
+   "replan_info": [
+    {
+     "name": "AW-global",
+     "budget": 20000,
+     "pop": 100,
+     "n_tasks": 13,
+     "n_agv": 9,
+     "wall_ms": 524.6582999998282,
+     "evals": 20000
+    }
+   ],
+   "timeout": false
+  },
+  "A*-GA": {
+   "f1_base": 313.0,
+   "f1_event": 576.0,
+   "deg_pct": 84.02555910543131,
+   "warn_t": 165.0,
+   "maint_enter": null,
+   "fault_agv": 3,
+   "replan_info": [],
+   "timeout": false
+  }
+ }
+}

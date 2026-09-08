@@ -1,0 +1,30 @@
+{
+  "title": "Cooperative Multi-Objective AGV Path Optimization in Smart Warehousing: An IoT-Inspired Closed-Loop Design with an Equipment-Health Safety Margin",
+  "description": "Python reference implementation of the Equipment Health-Constrained Optimization (EHCO) framework accompanying the manuscript of the same title: a four-layer closed-loop architecture coupling an AW-NSGA-II optimizer with a fuzzy-logic adaptive weight controller, a multi-indicator state-of-health model, and event-driven replanning for smart-warehouse AGV fleets. Includes the full experimental pipeline (E1 static comparison, E2 component ablations, E4 dynamic closed-loop study with event-driven component ablation, E6 parameter sensitivity) and the independent-seed validation, robustness and anytime archives (seeds 1-60).",
+  "creators": [
+    {
+      "name": "Zou, Yi",
+      "affiliation": "Zhanjiang University of Science and Technology"
+    },
+    {
+      "name": "Mai, Chunna",
+      "affiliation": "Zhanjiang University of Science and Technology"
+    },
+    {
+      "name": "Wu, Dongliu",
+      "affiliation": "Zhanjiang University of Science and Technology"
+    }
+  ],
+  "keywords": [
+    "AGV scheduling",
+    "multi-objective optimization",
+    "NSGA-II",
+    "state of health",
+    "smart warehouse",
+    "discrete-event simulation"
+  ],
+  "license": "mit-license",
+  "upload_type": "software",
+  "access_right": "open",
+  "language": "eng"
+}

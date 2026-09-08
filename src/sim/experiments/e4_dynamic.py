@@ -921,9 +921,16 @@ def aggregate(raw: list[dict]) -> list[dict]:
                     "metric": "deg_pct", "mean": m, "std": s, "n": len(rows)})
         resp = [r["response_ms"] for r in rows]
         if any(v not in ("", None) for v in resp):
+            # 口径（2026-09-05）：replanning time 只对 replan_applied=1 且
+            # 有响应值的行有语义；n 记录 applied 子集大小（与正文 §3.3
+            # "n = 95/90/150 runs that replanned" 一致），不是总行数。
+            resp = [r["response_ms"] for r in rows
+                    if r.get("replan_applied") == "1"
+                    and r["response_ms"] not in ("", None)]
             m2, s2 = _mean_std(resp)
             agg.append({"scenario": scenario, "strategy": strategy,
-                        "metric": "response_ms", "mean": m2, "std": s2, "n": len(rows)})
+                        "metric": "response_ms", "mean": m2, "std": s2,
+                        "n": len(resp) if np.isfinite(m2) else len(rows)})
         fired = [r.get("event_fired", 1) for r in rows]
         agg.append({"scenario": scenario, "strategy": strategy,
                     "metric": "event_fired_rate", "mean": float(np.mean(fired)),

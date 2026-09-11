@@ -1,6 +1,6 @@
-# Parameter Sensitivity (E6, 14 perturbations × 30 seeds) — Table S2
+# Parameter Sensitivity (E6, 16 perturbations × 30 seeds) — Table S2
 
-Archive regenerated 2026-09-04 from `sim/results/e6/e6_sensitivity.csv` (current calibre); identical values to the rebuilt supplementary Table S2 and manuscript Table 2.
+Archive updated 2026-09-09 from `sim/results/e6/e6_sensitivity.csv` (current calibre); identical values to the rebuilt supplementary Table S2 and manuscript Table 2.
 
 | Perturbation | f1 (%Δ) | f2 (%Δ) | HV (%Δ) | Δh̄ (%Δ) |
 |---|---|---|---|---|
@@ -19,5 +19,7 @@ Archive regenerated 2026-09-04 from `sim/results/e6/e6_sensitivity.csv` (current
 | thr_hi | +0.00 | +0.00 | +0.00 | +0.00 |
 | dl_lo | -3.70 | +6.61 | +0.41 | +0.41 |
 | dl_hi | -0.78 | -9.88 | -2.79 | +0.25 |
+| c_m_lo | +2.10 | -6.90 | -0.51 | -0.87 |
+| c_m_hi | -1.13 | +5.43 | +1.42 | -0.06 |
 
-*Base = AW-NSGA-II default parameters (solution unchanged, Δf1 = ΔHV = 0.0%, for h_safe, α, β and AHP rows — β/AHP Δh̄ shifts reflect SoH-reading-only changes). FLC-boundary ±10%: Δf1 −1.8%/+1.2%, ΔHV −4.6%/+1.7%. Deadline multiplier most sensitive: Δf1 −3.7% (dl_lo).*
+*Base = AW-NSGA-II default parameters (solution unchanged, Δf1 = ΔHV = 0.0%, for h_safe, α, β and AHP rows — β/AHP Δh̄ shifts reflect SoH-reading-only changes). FLC-boundary ±10%: Δf1 −1.8%/+1.2%, ΔHV −4.6%/+1.7%. Deadline multiplier most sensitive: Δf1 −3.7% (dl_lo). The c_m maintenance-cost rows (±50%, [100,300] CNY around the 200 CNY baseline) perturb the f2 monetary proxy and induce small solution-level shifts (|Δf1| ≤ 2.1%, |ΔHV| ≤ 1.5%) with |ΔΔh̄| ≤ 0.9%; the algorithm-ranking conclusion is unchanged.*

@@ -129,7 +129,7 @@ the independent-seed validation arms (31–60), the anytime best-so-far study
 (E-B2), the activated-health robustness sweeps (E-ALPHA / E-WROBUST), the
 h0-coupled degradation replay (E-h0λ) and the hyper-parameter sensitivity
 re-verification data (E1-TUNE), are included in the `results/` directory of
-this repository (release v1.0.3). The seed manifest for the 1–60 protocol is
+this repository (release v1.0.4). The seed manifest for the 1–60 protocol is
 `results/seeds.json`. Raw simulation outputs beyond these files are available
 from the corresponding author upon reasonable request.
 

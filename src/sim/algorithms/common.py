@@ -3,7 +3,7 @@
 Common pieces for the eight comparison algorithms:
 - equal evaluation budget (20,000 evals) enforced by :class:`EvalBudget`
 - D3 genetic operators: uniform column-wise crossover, swap + per-gene mutation
-- linear pc/pm schedule (0.9->0.6 / 0.05->0.2 over Gmax=200)
+- linear pc/pm schedule (0.9->0.6 / 0.01->0.02 over Gmax=200)
 - an NSGA-II-style generational core whose *last-front fill criterion* is
   pluggable:
     * crowding distance            (NSGA-II 2/3-obj)
@@ -75,7 +75,7 @@ def pc_at(g: int) -> float:
 
 
 def pm_at(g: int) -> float:
-    return C.PM_MIN + (C.PM_MAX - C.PM_MIN) * g / C.GMAX      # 0.05 -> 0.2
+    return C.PM_MIN + (C.PM_MAX - C.PM_MIN) * g / C.GMAX      # 0.01 -> 0.02
 
 
 def eligible_mask(h_cum: np.ndarray, cfg: EvalConfig) -> np.ndarray:

@@ -11,14 +11,18 @@ Perturbation grid (SPEC E6):
   FLC bounds    +/-10%           (membership boundaries scaled)
   degradation threshold +/-30%   (-7e-5 / -1.3e-4)
   deadline mult {1.3, 1.7}       (baseline 1.5)
+  maintenance cost c_m x0.5 / x1.5  (100 / 300 CNY; baseline 200)
 
 Honest reporting notes (static scenario):
   - h_safe / alpha / degradation threshold affect only the piecewise health
     penalty f4 and the warning rule; with h_cum in [0.7, 1.0] the static f4 is
     0 for every perturbation, so HV/f1 are structurally insensitive (reported
     as such; the dynamic scenarios E4 exercise these components).
-  - beta / AHP weights affect the EWMA health estimator -> the fleet delta-h
-    statistics, not the static fitness itself (reported via delta_h metrics).
+  - beta / AHP weights / maintenance cost c_m act on the objective or the EWMA
+    health estimator: c_m rescales the c_m*(1-h) maintenance proxy inside f2
+    (monetary term, solution-level effects reported via f2/HV and delta_h);
+    beta/AHP affect only the fleet delta-h statistics, not the static fitness
+    itself (reported via delta_h metrics).
   - FLC bounds and deadline multiplier change the optimisation landscape ->
     HV/f1 responses.
 
@@ -69,6 +73,8 @@ PERTURBATIONS: dict[str, tuple[dict, float]] = {
     "thr_hi":     ({"DEGRAD_THRESHOLD": -1.3e-4}, 1.0),
     "dl_lo":      ({"DEADLINE_MULT": 1.3}, 1.0),
     "dl_hi":      ({"DEADLINE_MULT": 1.7}, 1.0),
+    "c_m_lo":     ({"C_M": 100.0}, 1.0),   # x0.5 (200 CNY baseline)
+    "c_m_hi":     ({"C_M": 300.0}, 1.0),   # x1.5
 }
 ORDER = [BASE] + list(PERTURBATIONS)
 
@@ -81,7 +87,7 @@ def _apply(name: str) -> None:
     if not _ORIG:
         _ORIG = {"C": {k: getattr(C, k) for k in
                        ("H_SAFE", "ALPHA_PENALTY", "EWMA_BETA", "AHP_W",
-                        "DEGRAD_THRESHOLD", "DEADLINE_MULT")},
+                        "DEGRAD_THRESHOLD", "DEADLINE_MULT", "C_M")},
                  "FLC_BOUND_SCALE": FLC.BOUND_SCALE}
     ov, scale = PERTURBATIONS[name]
     for k, v in ov.items():

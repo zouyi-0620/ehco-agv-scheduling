@@ -5,21 +5,19 @@ that support Table S12 and Figure S3 of the supplementary material.
 
 ## Which file to use for the reported p-values (important)
 
-The manuscript's anytime claim and **Table S12 / Figure S3 caption statistics
-are computed from `e_b2_trajectory.csv`**, using the *generation-end*
-`bsf_hv` sample whose wall-clock time is the last generation end `<= budget`
-(`np.searchsorted(t, budget, side="right") - 1`). Reproducing the table's
-p-values therefore requires this trajectory-based lookup — see
-`src/sim/experiments/e_b2_anytime.py` and the table builder
-(`_add_b2_suppl.py`, which reads `e_b2_trajectory.csv`).
+Table S12 / Figure S3 statistics are computed from `e_b2_trajectory.csv` using the
+*generation-end* `bsf_hv` sample whose wall-clock time is the last generation end
+`<= budget` (`np.searchsorted(t, budget, side="right") - 1`).  **The per-arm series
+must be built over the deduplicated seed list** (`sorted({s for (s, algo) in traj if s <= 30})`,
+30 seeds per arm) — `traj` is keyed by `(seed, algo)`, so naively iterating its keys
+duplicates every seed and inflates the paired Wilcoxon statistic.  The table builds
+with a standard Holm–Bonferroni step-down (smallest p multiplied by m = 5).
+See `src/sim/experiments/e_b2_anytime.py` and the table builder (`_add_b2_suppl.py`).
 
-`e_b2_budget_bsf.csv` is a **different, coarser grid**: it records `bsf_hv`
-on the 50 ms sampling grid *at each exact budget point* (multiples of 50 ms).
-Because the best-so-far value can differ between a generation-end sample and
-the exact 50 ms grid point, a Wilcoxon test recomputed directly on
-`e_b2_budget_bsf.csv` will **not** reproduce the Table S12 p-values (e.g. the
-seeds-1-30 1000 ms row gives raw p ≈ 0.135 instead of 0.031). This is a file
-convention, not a data error.
+Note (2026-09-10): an earlier revision of this note claimed that `e_b2_budget_bsf.csv`
+(exact 50 ms grid) yields different p-values and must not be used.  That is **obsolete**:
+the two files currently agree exactly at every budget point (0/600 mismatches), so either
+gives the same per-seed values; only the deduplication and Holm conventions above matter.
 
 ## Files
 

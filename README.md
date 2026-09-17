@@ -6,7 +6,7 @@ Python reference implementation accompanying the manuscript
 
 > **"Cooperative Multi-Objective AGV Path Optimization in Smart Warehousing:
 > An IoT-Inspired Closed-Loop Design with an Equipment-Health Safety Margin"**
-> Y. Zou, C. Mai, D. Wu — submitted to *Machines* (MDPI)
+> Y. Zou, C. Mai, D. Wu 
 
 This repository contains the complete simulation and optimization framework
 used to produce every experimental result in the manuscript: the static

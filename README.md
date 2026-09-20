@@ -1,12 +1,10 @@
-# EHCO: Equipment-Health-Constrained Closed-Loop Multi-Objective AGV Path Optimization
+# Real-Time Health-Aware Closed-Loop Scheduling for Warehouse AGV Fleets: Multi-Objective Architecture, Wall-Clock Evidence, and an Open Reproducible Benchmark
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22242889.svg)](https://doi.org/10.5281/zenodo.22242889)
 
-Python reference implementation accompanying the manuscript
+**EHCO** (Equipment Health-Constrained Optimization) — Python reference implementation accompanying the manuscript.
 
-> **"Real-Time Health-Aware Closed-Loop Scheduling for Warehouse AGV Fleets:
-> Multi-Objective Architecture, Wall-Clock Evidence, and an Open Reproducible Benchmark"**
-> Y. Zou, C. Mai
+> **Y. Zou, C. Mai** · Zhanjiang University of Science and Technology
 
 This repository contains the complete simulation and optimization framework
 used to produce every experimental result in the manuscript: the static

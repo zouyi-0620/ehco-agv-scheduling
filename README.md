@@ -1,4 +1,4 @@
-# Real-Time Health-Aware Closed-Loop Scheduling for Warehouse AGV Fleets: Multi-Objective Architecture, Wall-Clock Evidence, and an Open Reproducible Benchmark
+# Health-Aware Closed-Loop Multi-Objective Scheduling for Warehouse AGV Fleets: Wall-Clock Evaluation and Reproducible Simulation
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22242889.svg)](https://doi.org/10.5281/zenodo.22242889)
 

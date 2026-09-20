@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-title: "Real-Time Health-Aware Closed-Loop Scheduling for Warehouse AGV Fleets: Multi-Objective Architecture, Wall-Clock Evidence, and an Open Reproducible Benchmark"
+title: "Health-Aware Closed-Loop Multi-Objective Scheduling for Warehouse AGV Fleets: Wall-Clock Evaluation and Reproducible Simulation"
 authors:
   - family-names: Zou
     given-names: Yi
@@ -21,8 +21,12 @@ abstract: >-
   event-driven component ablation, E6 parameter sensitivity).
 keywords:
   - AGV scheduling
+  - closed-loop optimization
+  - equipment health management
+  - health-aware scheduling
   - multi-objective optimization
   - NSGA-II
-  - state of health
-  - smart warehouse
+  - warehouse automation
   - discrete-event simulation
+  - smart warehouse
+  - state of health

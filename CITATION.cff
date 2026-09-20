@@ -1,15 +1,12 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-title: "Cooperative Multi-Objective AGV Path Optimization in Smart Warehousing: An IoT-Inspired Closed-Loop Design with an Equipment-Health Safety Margin"
+title: "Real-Time Health-Aware Closed-Loop Scheduling for Warehouse AGV Fleets: Multi-Objective Architecture, Wall-Clock Evidence, and an Open Reproducible Benchmark"
 authors:
   - family-names: Zou
     given-names: Yi
     affiliation: Zhanjiang University of Science and Technology
   - family-names: Mai
     given-names: Chunna
-    affiliation: Zhanjiang University of Science and Technology
-  - family-names: Wu
-    given-names: Dongliu
     affiliation: Zhanjiang University of Science and Technology
 type: software
 license: MIT

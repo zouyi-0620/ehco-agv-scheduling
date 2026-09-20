@@ -4,9 +4,9 @@
 
 Python reference implementation accompanying the manuscript
 
-> **"Cooperative Multi-Objective AGV Path Optimization in Smart Warehousing:
-> An IoT-Inspired Closed-Loop Design with an Equipment-Health Safety Margin"**
-> Y. Zou, C. Mai, D. Wu 
+> **"Real-Time Health-Aware Closed-Loop Scheduling for Warehouse AGV Fleets:
+> Multi-Objective Architecture, Wall-Clock Evidence, and an Open Reproducible Benchmark"**
+> Y. Zou, C. Mai
 
 This repository contains the complete simulation and optimization framework
 used to produce every experimental result in the manuscript: the static
@@ -122,14 +122,15 @@ results/              aggregated tables and per-run data backing every figure
 
 ## Data availability
 
-All aggregated result tables (CSV) supporting Figures 2–8 and Tables 1–12 and
-S1–S15 of the manuscript, together with the per-run data of the dynamic-event
+All aggregated result tables (CSV) supporting Figures 1–3 and Tables I–V of the
+manuscript and Figures S1–S8, Tables S1–S22 and Notes S21–S36 of the
+supplementary material, together with the per-run data of the dynamic-event
 study (E4) and its ablation, the seven validation experiments (E-C16 … E-C22),
 the independent-seed validation arms (31–60), the anytime best-so-far study
 (E-B2), the activated-health robustness sweeps (E-ALPHA / E-WROBUST), the
 h0-coupled degradation replay (E-h0λ) and the hyper-parameter sensitivity
 re-verification data (E1-TUNE), are included in the `results/` directory of
-this repository (release v1.0.4). The seed manifest for the 1–60 protocol is
+this repository (release v1.0.5). The seed manifest for the 1–60 protocol is
 `results/seeds.json`. Raw simulation outputs beyond these files are available
 from the corresponding author upon reasonable request.
 

@@ -56,13 +56,12 @@ from .. import constants as C
 from ..metrics import holm_adjust, paired_wilcoxon
 from ..scenario import make_scenario
 from .e_c16 import (make_c16_scenario, arm_metrics, ARMS as ARMS_CALL)
+from . import _paths
 
-R_ALPHA = os.path.join(os.path.dirname(__file__), "..", "results", "e_alpha")
-R_WR = os.path.join(os.path.dirname(__file__), "..", "results", "e_wrobust")
-C16_MET = os.path.join(os.path.dirname(__file__), "..", "results", "e_c16",
-                       "c16_metrics.csv")
-SEEDS_PATH = os.path.join(os.path.dirname(__file__), "..", "results",
-                          "seeds.json")
+# 随包数据统一走 _paths（修复 2026-09-23）：发布布局下数据在仓库根 results/。
+R_ALPHA = _paths.resolve_dir("e_alpha")
+R_WR = _paths.resolve_dir("e_wrobust")
+C16_MET = _paths.resolve_file("e_c16/c16_metrics.csv")
 
 ALPHAS = (0.1, 0.3, 0.5, 0.8, 1.0)
 W_EXPLICIT = {
@@ -93,12 +92,9 @@ def _patch(**kw):
 
 
 def _load_seeds(seeds):
-    if seeds is not None:
-        return seeds
-    if os.path.exists(SEEDS_PATH):
-        with open(SEEDS_PATH, encoding="utf-8") as f:
-            return json.load(f)
-    return list(range(1, 31))
+    # Default = the 30-seed main protocol (constants.SEEDS).  seeds.json is a
+    # 1-60 protocol manifest and deliberately does not drive runs (a2, 2026-09-24).
+    return seeds if seeds is not None else list(C.SEEDS)
 
 
 def make_mix_scenario(seed):

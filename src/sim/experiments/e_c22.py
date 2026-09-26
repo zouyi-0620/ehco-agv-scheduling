@@ -64,12 +64,12 @@ from ..experiments.e_c20 import run_compound
 from ..metrics import cohen_dz, paired_wilcoxon
 from ..objectives import EvalConfig
 from ..scenario import Scenario, make_scenario
+from . import _paths
 
 RESULTS = os.path.join(os.path.dirname(__file__), "..", "results", "e_c22")
-PUBLISHED_E4 = os.path.join(os.path.dirname(__file__), "..", "..",
-                            "results", "e4", "e4_raw.csv")
-C20_RAW = os.path.join(os.path.dirname(__file__), "..", "results", "e_c20",
-                       "e_c20_raw.csv")
+# 随包基线：统一走 _paths（修复 2026-09-23；原写法在两种布局下都会取错/取不到）
+PUBLISHED_E4 = _paths.resolve_file("e4/e4_raw.csv")
+C20_RAW = _paths.resolve_file("e_c20/e_c20_raw.csv")
 VARIANTS = ("stdA*", "nocostadapt")
 
 

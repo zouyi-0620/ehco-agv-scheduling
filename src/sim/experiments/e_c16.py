@@ -66,7 +66,6 @@ from ..objectives import (EvalConfig, build_plan, evaluate_population,
 from ..scenario import make_scenario
 
 RESULTS = os.path.join(os.path.dirname(__file__), "..", "results", "e_c16")
-SEEDS_PATH = os.path.join(os.path.dirname(__file__), "..", "results", "seeds.json")
 
 N_LOW = 5                    # weak AGVs per fleet
 LOW_LO, LOW_HI = 0.30, 0.60  # below h_safe, above h_crit -> f4 active
@@ -235,12 +234,9 @@ def _write_csv(path, rows):
 
 def run_c16(seeds: list[int] | None = None, arms: list[str] | None = None,
             verbose: bool = True) -> dict:
-    if seeds is None:
-        if os.path.exists(SEEDS_PATH):
-            with open(SEEDS_PATH, encoding="utf-8") as f:
-                seeds = json.load(f)
-        else:
-            seeds = list(C.SEEDS)
+    # Default = the 30-seed main protocol (constants.SEEDS).  seeds.json is a
+    # 1-60 protocol manifest and deliberately does not drive runs (a2, 2026-09-24).
+    seeds = seeds or list(C.SEEDS)
     arms = arms or ORDER
     os.makedirs(RESULTS, exist_ok=True)
 

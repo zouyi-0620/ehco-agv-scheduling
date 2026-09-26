@@ -53,10 +53,11 @@ from ..algorithms import run_algorithm
 from ..experiments.e4_dynamic import (DynamicSimulator, SEEDS, make_instances)
 from ..metrics import cohen_dz, paired_wilcoxon
 from ..scenario import make_scenario
+from . import _paths
 
 RESULTS = os.path.join(os.path.dirname(__file__), "..", "results", "e_c21")
-PUBLISHED_E4 = os.path.join(os.path.dirname(__file__), "..", "..",
-                            "results", "e4", "e4_raw.csv")
+# 随包基线：统一走 _paths（修复 2026-09-23；原写法在两种布局下都会取错/取不到）
+PUBLISHED_E4 = _paths.resolve_file("e4/e4_raw.csv")
 NEW_BETAS = (5e-4, 2e-3, 5e-3)
 
 

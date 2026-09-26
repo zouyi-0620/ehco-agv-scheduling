@@ -1,8 +1,12 @@
 """E1 main comparison runner (SPEC.md sections 8, 9, 11).
 
 Fair comparison protocol:
-- 30 fixed seeds (1..30, written to results/seeds.json) shared by every
-  algorithm (same Scenario instance per seed - tasks, AGV init, noise).
+- Default seed set = the 30-seed MAIN protocol (constants.SEEDS, seeds 1..30),
+  shared by every algorithm (same Scenario instance per seed - tasks, AGV init,
+  noise). `results/seeds.json` is the 1-60 PROTOCOL MANIFEST (1-30 in-sample +
+  31-60 independent validation arms) and is documentation only: it does NOT
+  drive any run. The independent arm is requested explicitly, e.g.
+  `run_e1(seeds=list(range(31, 61)), out_dir=".../results/e1_indep")`.
 - Equal 20,000-eval budget per algorithm run.
 - Per seed, the HV normalisation follows D5: min-max over the union of ALL
   algorithms' final fronts (in the algorithm's own objective subspace), then
@@ -16,14 +20,13 @@ Outputs (results/e1/):
   e1_compare.csv     : per (algo, metric) mean +- std over the 30 seeds
   e1_stats.csv       : pairwise Wilcoxon + Holm + Cohen's d_z + 95% CI vs
                        AW-NSGA-II (D9)
-  seeds.json         : the fixed seed list
 
-Optional CLI: --seeds "1,2,3" --algo "AW-NSGA-II,MOEA/D" for quick runs.
+Optional CLI: --seeds "1,2,3" --algo "AW-NSGA-II,MOEA/D" for quick runs;
+--seeds "31,32,...,60" reproduces the independent validation arm.
 """
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import time
 from collections import defaultdict
@@ -39,19 +42,7 @@ from ..objectives import build_plan, simulate_plan_health
 from ..scenario import make_scenario
 
 RESULTS = os.path.join(os.path.dirname(__file__), "..", "results", "e1")
-SEEDS_PATH = os.path.join(os.path.dirname(__file__), "..", "results", "seeds.json")
 REF = np.ones(4)
-
-
-def _load_or_write_seeds(path: str) -> list[int]:
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    seeds = list(C.SEEDS)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(seeds, f, indent=1)
-    return seeds
 
 
 def _fleet_health(res: AlgorithmResult, sc,
@@ -83,7 +74,9 @@ def run_e1(seeds: list[int] | None = None,
            algos: list[str] | None = None,
            out_dir: str | None = None,
            verbose: bool = True) -> dict:
-    seeds = seeds or _load_or_write_seeds(SEEDS_PATH)
+    # Default = the 30-seed main protocol (constants.SEEDS).  seeds.json is a
+    # 1-60 protocol manifest and deliberately does not drive runs (a2, 2026-09-24).
+    seeds = seeds or list(C.SEEDS)
     algos = algos or ORDER
     out_dir = out_dir or RESULTS
     os.makedirs(out_dir, exist_ok=True)

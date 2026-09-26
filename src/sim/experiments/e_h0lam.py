@@ -40,8 +40,6 @@ from .e_c16 import arm_metrics  # noqa: F401 (unused; ensure c16 import side)
 RESULTS = os.path.join(os.path.dirname(__file__), "..", "results", "e_h0lam")
 LAMS = (0.0, 1.0, 2.0)
 ARMS_RUN = ("full", "hard", "nohealth")
-SEEDS_PATH = os.path.join(os.path.dirname(__file__), "..", "results",
-                          "seeds.json")
 
 
 def _replay_stats(res, sc, low, lam):
@@ -63,13 +61,9 @@ def _replay_stats(res, sc, low, lam):
 
 
 def run(seeds=None, verbose=True):
-    if seeds is None:
-        if os.path.exists(SEEDS_PATH):
-            import json
-            with open(SEEDS_PATH, encoding="utf-8") as f:
-                seeds = json.load(f)
-        else:
-            seeds = list(range(1, 31))
+    # Default = the 30-seed main protocol (constants.SEEDS).  seeds.json is a
+    # 1-60 protocol manifest and deliberately does not drive runs (a2, 2026-09-24).
+    seeds = seeds or list(C.SEEDS)
     os.makedirs(RESULTS, exist_ok=True)
     t0 = time.perf_counter()
     rows = []

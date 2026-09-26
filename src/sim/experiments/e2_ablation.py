@@ -33,7 +33,6 @@ Optional CLI: --seeds "1,2,3" --variant "-health,hard-only" --reuse-e1 0
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import time
 from collections import defaultdict
@@ -51,7 +50,6 @@ from ..scenario import make_scenario
 from .e1_main import RESULTS as E1_DIR, _fleet_health, _hv_in_subspace
 
 RESULTS = os.path.join(os.path.dirname(__file__), "..", "results", "e2")
-SEEDS_PATH = os.path.join(os.path.dirname(__file__), "..", "results", "seeds.json")
 REF = np.ones(4)
 
 FULL_NAME = "Full"

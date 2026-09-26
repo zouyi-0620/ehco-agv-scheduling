@@ -61,11 +61,12 @@ from ..experiments.e4_dynamic import (DynamicSimulator, make_instances)
 from ..metrics import cohen_dz, paired_wilcoxon
 from ..objectives import EvalConfig
 from ..scenario import make_scenario
+from . import _paths
 
 RESULTS = os.path.join(os.path.dirname(__file__), "..", "results", "e_c17")
-_CODE_E4 = os.path.join(os.path.dirname(__file__), "..", "results", "e4", "e4_raw.csv")
-_REL_E4 = os.path.join(os.path.dirname(__file__), "..", "..", "results", "e4", "e4_raw.csv")
-PUBLISHED_E4 = _CODE_E4 if os.path.exists(_CODE_E4) else _REL_E4
+# 随包基线：统一走 _paths（修复 2026-09-23）。原来只试两个候选路径，
+# 发布布局（src/sim/... + 仓库根 results/）下两者都不存在。
+PUBLISHED_E4 = _paths.resolve_file("e4/e4_raw.csv")
 SEEDS = list(range(1, 31))
 
 
@@ -144,6 +145,7 @@ def run_agnostic(kind: str, seed: int, inst: dict, plans: dict,
 
 
 def _load_published(path: str) -> dict[tuple, dict]:
+    _paths.require_file(path, "e4 published baseline")
     pub = {}
     with open(path, encoding="utf-8") as f:
         for r in csv.DictReader(f):

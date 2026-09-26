@@ -61,6 +61,7 @@ from .. import constants as C
 from ..algorithms import ORDER, run_algorithm
 from ..metrics import fast_non_dominated_sort, hypervolume
 from ..scenario import make_scenario
+from . import _paths
 
 RESULTS = os.path.join(os.path.dirname(__file__), "..", "results",
                        "e_b2_anytime")
@@ -127,7 +128,9 @@ def _write_csv(path: str, rows: list[dict]) -> None:
 
 def run_b2(seeds: list[int], verbose: bool = True) -> dict:
     os.makedirs(RESULTS, exist_ok=True)
-    base = os.path.join(os.path.dirname(RESULTS))
+    # 随包参考指标根目录：统一走 _paths（修复 2026-09-23；原来写死 dirname(RESULTS)，
+    # 发布布局下参考数据实际在仓库根 results/，会静默取不到）
+    base = _paths.resolve_dir("")
     # reference metrics: seeds 1-30 live in e1/, seeds 31-60 in e1_indep/
     ref = {}
     for sub in ("e1", "e1_indep"):

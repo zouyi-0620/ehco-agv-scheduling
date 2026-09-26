@@ -65,8 +65,8 @@ PERTURBATIONS: dict[str, tuple[dict, float]] = {
     "alpha_mid":  ({"ALPHA_PENALTY": 0.4}, 1.0),
     "beta_lo":    ({"EWMA_BETA": 5e-4}, 1.0),
     "beta_hi":    ({"EWMA_BETA": 5e-3}, 1.0),
-    "ahp_lo":     ({"AHP_W": np.array([0.32, 0.28, 0.20])}, 1.0),   # x0.8, renorm
-    "ahp_hi":     ({"AHP_W": np.array([0.48, 0.42, 0.30])}, 1.0),   # x1.2, renorm
+    "ahp_lo":     ({"AHP_W": np.array([0.32, 0.28, 0.20])}, 1.0),   # x0.8, NO renorm (uniform rescale of the fused SoH reading)
+    "ahp_hi":     ({"AHP_W": np.array([0.48, 0.42, 0.30])}, 1.0),   # x1.2, NO renorm (uniform rescale; relative weights unchanged)
     "flc_lo":     ({}, 0.9),
     "flc_hi":     ({}, 1.1),
     "thr_lo":     ({"DEGRAD_THRESHOLD": -7e-5}, 1.0),

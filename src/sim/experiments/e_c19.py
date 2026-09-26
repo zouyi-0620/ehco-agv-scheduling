@@ -57,12 +57,13 @@ from ..algorithms.moead import run as moead_run
 from ..experiments.e4_dynamic import (DynamicSimulator, SEEDS, make_instances)
 from ..metrics import cohen_dz, paired_wilcoxon
 from ..scenario import make_scenario
+from . import _paths
 
 RESULTS = os.path.join(os.path.dirname(__file__), "..", "results", "e_c19")
-PUBLISHED_E4 = os.path.join(os.path.dirname(__file__), "..", "..",
-                            "results", "e4", "e4_raw.csv")
-PUBLISHED_ABL = os.path.join(os.path.dirname(__file__), "..", "..",
-                             "results", "e4", "e4_ablation_raw.csv")
+# 随包基线：统一走 _paths（修复 2026-09-23）。原实现只写根相对路径，
+# 本地会静默读到项目根一棵陈旧的重复树（09-02 pre-slack），发布布局下则根本不存在。
+PUBLISHED_E4 = _paths.resolve_file("e4/e4_raw.csv")
+PUBLISHED_ABL = _paths.resolve_file("e4/e4_ablation_raw.csv")
 
 VARIANTS = ("moead-cl", "moead-full")
 SCENARIOS = ("congestion", "fault", "urgent")
@@ -164,9 +165,10 @@ def run_moead_variant(kind: str, seed: int, inst: dict, plans: dict,
 
 
 def _load_published(path: str, strategies: tuple[str, ...]) -> dict[tuple, dict]:
+    # 显式失败（修复 2026-09-23）：原来对不存在的路径静默返回空 dict，
+    # 于是参考臂全部落空、统计表被静默写成空表，掩盖了路径错误。
+    _paths.require_file(path, "e4 published baseline")
     pub: dict[tuple, dict] = {}
-    if not os.path.exists(path):
-        return pub
     with open(path, encoding="utf-8") as f:
         for r in csv.DictReader(f):
             if r["strategy"] in strategies:

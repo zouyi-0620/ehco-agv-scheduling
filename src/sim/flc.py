@@ -54,8 +54,12 @@ def mu_h(x: float) -> tuple[float, float, float]:
             _trap(x, 0.5, 0.7, 1, 1))
 
 
-# COG centroids of the output linguistic values L/M/H (manuscript P220)
-CENTROID = np.array([0.067, 0.30, 0.50])
+# NOTE (2026-09-23): there is NO separate defuzzification stage. Each firing
+# rule carries an explicit 4-D consequent weight vector; flc_weights() returns
+# the Mamdani min-AND strength-weighted average of those consequents, then
+# normalises by its own component sum (manuscript Note S8 states this
+# explicitly). A legacy `CENTROID = [0.067, 0.30, 0.50]` variable was removed
+# here: it was never referenced anywhere in the codebase.
 
 # 27-rule consequent table (SPEC.md section 7; explicit for reproducibility).
 # index: (h_level, rho_level, gamma_level) -> (w1, w2, w3, w4)
@@ -103,7 +107,13 @@ _build_rules()
 
 
 def flc_weights(rho: float, gamma: float, h_bar: float) -> np.ndarray:
-    """Return normalised (w1, w2, w3, w4) with sum == 1 (COG + sum-normalise)."""
+    """Return normalised (w1, w2, w3, w4) with sum == 1.
+
+    Mamdani min-AND strength-weighted averaging of the firing rules' explicit
+    consequent vectors, normalised by its own component sum. There is no
+    separate defuzzification stage (manuscript Note S8); the output falls back
+    to uniform [0.25]*4 when no rule fires.
+    """
     mr, mg, mh = mu_rho(rho), mu_gamma(gamma), mu_h(h_bar)
     wsum = np.zeros(4)
     total = 0.0

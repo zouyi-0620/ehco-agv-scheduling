@@ -89,10 +89,22 @@ python -m sim.experiments.e_c20   # compound-event cascade scenario
 python -m sim.experiments.e_c21   # health-tracking rate (beta) sensitivity
 python -m sim.experiments.e_c22   # dynamic path-cost ablation
 
-# Independent validation arms: run the same protocol on seeds 31–60
-# (see module docstrings; outputs land under results/e1_indep/, e4_indep/,
-#  e_c17_indep/, e_c19_indep/, e_c20_indep/, e4_ablation_indep/).
+# Independent validation arms: re-run the same protocol on seeds 31–60 and
+# send the output to results/<name>_indep/.  Runners that accept an output
+# directory expose it as follows:
+python -c "from sim.experiments.e1_main import run_e1; run_e1(seeds=list(range(31,61)), out_dir='results/e1_indep')"
+python -m sim.experiments.e4_dynamic  --seeds "$(seq -s, 31 60)" --out results/e4_indep
+python -m sim.experiments.e4_ablation --seeds "$(seq -s, 31 60)" --out results/e4_ablation_indep
+# The e_c17 / e_c19 / e_c20 runners write to a fixed results/<name>/ directory:
+# run them with --seeds "31,...,60" and move the outputs, e.g.
+#   python -m sim.experiments.e_c19 --seeds "$(seq -s, 31 60)" && mv results/e_c19 results/e_c19_indep
 ```
+
+⚠️ **Note on `results/seeds.json`** — it is the **1–60 protocol manifest**
+(1–30 = in-sample main protocol, 31–60 = independent validation arms) and is
+**documentation only: it does not drive any run**. Every runner defaults to the
+30-seed main protocol (`constants.SEEDS`, seeds 1–30); an independent arm is
+requested explicitly, as shown above.
 
 Each runner writes CSV/JSON outputs under `results/` with a fixed schema;
 see the module docstrings for the exact output columns.
@@ -120,16 +132,17 @@ results/              aggregated tables and per-run data backing every figure
 
 ## Data availability
 
-All aggregated result tables (CSV) supporting Figures 1–3 and Tables I–V of the
-manuscript and Figures S1–S8, Tables S1–S22 and Notes S21–S36 of the
-supplementary material, together with the per-run data of the dynamic-event
+All aggregated result tables (CSV) supporting the main-text figures and
+Tables I–V of the manuscript and Figures S1–S9, Tables S1–S21 and Notes S1–S20
+of the supplementary material, together with the per-run data of the dynamic-event
 study (E4) and its ablation, the seven validation experiments (E-C16 … E-C22),
 the independent-seed validation arms (31–60), the anytime best-so-far study
 (E-B2), the activated-health robustness sweeps (E-ALPHA / E-WROBUST), the
 h0-coupled degradation replay (E-h0λ) and the hyper-parameter sensitivity
 re-verification data (E1-TUNE), are included in the `results/` directory of
-this repository (release v1.0.5). The seed manifest for the 1–60 protocol is
-`results/seeds.json`. Raw simulation outputs beyond these files are available
+this repository (release v1.0.6). The seed manifest for the 1–60 protocol is
+`results/seeds.json` (1–30 = in-sample main protocol, 31–60 = independent validation
+arms). Raw simulation outputs beyond these files are available
 from the corresponding author upon reasonable request.
 
 ## License
